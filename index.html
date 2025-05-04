@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кофейний Куточок - Віртуальна Вітрина Коктейлів</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c1f1f 0%, #4a2c20 100%);
+      color: #fffef2;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Эффект параллакса для шапки */
+    header {
+      position: relative;
+      background: url('https://www.transparenttextures.com/patterns/coffee.png'), linear-gradient(135deg, #4a2c20 0%, #2c1f1f 100%);
+      background-attachment: fixed;
+      background-size: cover;
+      padding: 5rem 0;
+      text-align: center;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Анимация для карточек коктейлей и печенья */
+    .item-card {
+      background: rgba(44, 31, 31, 0.9);
+      border-radius: 15px;
+      padding: 1.5rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #6f4e37;
+      cursor: pointer;
+    }
+
+    .item-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+      background: rgba(60, 47, 47, 0.95);
+    }
+
+    .item-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(212, 163, 115, 0.2), transparent);
+      transition: all 0.5s ease;
+      opacity: 0;
+    }
+
+    .item-card:hover::before {
+      opacity: 1;
+      transform: translateX(100%);
+    }
+
+    /* Анимация сортировки */
+    @keyframes sortAnimation {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      50% { transform: translateY(-10px) scale(1.05); opacity: 0.8; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .sort-anim {
+      animation: sortAnimation 0.6s ease-in-out;
+    }
+
+    /* Анимация появления */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeInUp 1.2s ease-out forwards;
+    }
+
+    /* Фильтры */
+    .filter-section {
+      background: rgba(44, 31, 31, 0.9);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+
+    /* Кнопки */
+    button {
+      background: #d4a373;
+      color: #2c1f1f;
+      padding: 0.5rem 1.5rem;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: #fffef2;
+      color: #4a2c20;
+      transform: translateY(-2px);
+    }
+
+    /* Плавный скролл */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    footer {
+      background: #4a2c20;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Шапка -->
+  <header>
+    <h1 class="text-5xl md:text-6xl font-bold tracking-wider text-[#fffef2] drop-shadow-lg">Кофейний Куточок</h1>
+    <p class="mt-3 text-xl md:text-2xl text-[#d4a373] drop-shadow-md">Ваше місце для насолоди кавовими коктейлями</p>
+  </header>
+
+  <!-- Основной контент -->
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <!-- Фильтры -->
+    <div class="filter-section flex flex-col md:flex-row gap-4 justify-center items-center">
+      <div>
+        <label for="price-filter" class="text-[#d4a373] mr-2">Сортувати за ціною:</label>
+        <select id="price-filter" class="bg-[#2c1f1f] text-[#fffef2] p-2 rounded-lg">
+          <option value="all">Усі</option>
+          <option value="low-to-high">Від дешевих до дорогих</option>
+          <option value="high-to-low">Від дорогих до дешевих</option>
+        </select>
+      </div>
+      <button onclick="filterCocktails()">Застосувати</button>
+    </div>
+
+    <h2 class="text-4xl md:text-5xl font-semibold text-center mb-10 text-[#d4a373] drop-shadow-lg">Віртуальна Вітрина Коктейлів</h2>
+    <div id="cocktail-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Коктейль 1 -->
+      <div class="item-card fade-in" data-price="120" data-ingredients="горілка, еспресо, кавовий лікер" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Еспресо Мартіні</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Горілка, еспресо, кавовий лікер</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">120 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 2 -->
+      <div class="item-card fade-in" style="animation-delay: 0.1s;" data-price="130" data-ingredients="ірландський віскі, кава, вершки" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Ірландський Кава</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Ірландський віскі, кава, вершки</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">130 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 3 -->
+      <div class="item-card fade-in" style="animation-delay: 0.2s;" data-price="110" data-ingredients="ром, еспресо, м'ята, лайм" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Мохіто</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Ром, еспресо, м'ята, лайм</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">110 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 4 -->
+      <div class="item-card fade-in" style="animation-delay: 0.3s;" data-price="90" data-ingredients="еспресо, карамель, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Карамельний Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, карамель, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">90 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 5 -->
+      <div class="item-card fade-in" style="animation-delay: 0.4s;" data-price="100" data-ingredients="еспресо, шоколадний сироп, вершки" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Шоколадний Еспресо</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, шоколадний сироп, вершки</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">100 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 6 -->
+      <div class="item-card fade-in" style="animation-delay: 0.5s;" data-price="115" data-ingredients="ром, еспресо, лаймовий сік" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Дайкірі</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Ром, еспресо, лаймовий сік</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">115 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 7 -->
+      <div class="item-card fade-in" style="animation-delay: 0.6s;" data-price="125" data-ingredients="амаретто, еспресо, вершки" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Амаретто Кава</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Амаретто, еспресо, вершки</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">125 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 8 -->
+      <div class="item-card fade-in" style="animation-delay: 0.7s;" data-price="140" data-ingredients="джин, кампарі, еспресо" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Негроні</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Джин, кампарі, еспресо</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">140 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 9 -->
+      <div class="item-card fade-in" style="animation-delay: 0.8s;" data-price="95" data-ingredients="еспресо, кокосове молоко, сироп" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кокосовий Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, кокосове молоко, сироп</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">95 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 10 -->
+      <div class="item-card fade-in" style="animation-delay: 0.9s;" data-price="105" data-ingredients="еспресо, мед, вершки" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Медовий Раф</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, мед, вершки</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">105 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 11 -->
+      <div class="item-card fade-in" style="animation-delay: 1s;" data-price="135" data-ingredients="бурбон, еспресо, лимонний сік" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Сауер</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Бурбон, еспресо, лимонний сік</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">135 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 12 -->
+      <div class="item-card fade-in" style="animation-delay: 1.1s;" data-price="85" data-ingredients="еспресо, ванільний сироп, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Ванільний Капучино</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, ванільний сироп, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">85 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 13 -->
+      <div class="item-card fade-in" style="animation-delay: 1.2s;" data-price="145" data-ingredients="бурбон, еспресо, біттер" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Олд Фешн</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Бурбон, еспресо, біттер</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">145 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 14 -->
+      <div class="item-card fade-in" style="animation-delay: 1.3s;" data-price="110" data-ingredients="еспресо, кавовий лікер, лід" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Фраппе з Лікером</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, кавовий лікер, лід</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">110 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 15 -->
+      <div class="item-card fade-in" style="animation-delay: 1.4s;" data-price="120" data-ingredients="джин, еспресо, содова" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Коллінз</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Джин, еспресо, содова</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">120 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 16 -->
+      <div class="item-card fade-in" style="animation-delay: 1.5s;" data-price="95" data-ingredients="еспресо, лавандовий сироп, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Лавандовий Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, лавандовий сироп, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">95 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 17 -->
+      <div class="item-card fade-in" style="animation-delay: 1.6s;" data-price="100" data-ingredients="еспресо, тонік, апельсин" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Тонік</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, тонік, апельсин</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">100 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 18 -->
+      <div class="item-card fade-in" style="animation-delay: 1.7s;" data-price="105" data-ingredients="еспресо, горіховий сироп, вершки" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Горіховий Раф</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, горіховий сироп, вершки</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">105 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 19 -->
+      <div class="item-card fade-in" style="animation-delay: 1.8s;" data-price="130" data-ingredients="текіла, еспресо, лаймовий сік" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Маргарита</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Текіла, еспресо, лаймовий сік</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">130 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 20 -->
+      <div class="item-card fade-in" style="animation-delay: 1.9s;" data-price="90" data-ingredients="еспресо, кориця, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Коричний Капучино</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, кориця, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">90 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 21 -->
+      <div class="item-card fade-in" style="animation-delay: 2s;" data-price="125" data-ingredients="джин, еспресо, содова, лимон" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Фіз</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Джин, еспресо, содова, лимон</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">125 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 22 -->
+      <div class="item-card fade-in" style="animation-delay: 2.1s;" data-price="100" data-ingredients="еспресо, м'ятний сироп, лід" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">М'ятний Фраппе</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, м'ятний сироп, лід</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">100 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 23 -->
+      <div class="item-card fade-in" style="animation-delay: 2.2s;" data-price="95" data-ingredients="еспресо, апельсиновий сік, мед" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Бамбл</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, апельсиновий сік, мед</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">95 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 24 -->
+      <div class="item-card fade-in" style="animation-delay: 2.3s;" data-price="115" data-ingredients="еспресо, ром, прянощі, мед" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Пунш</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, ром, прянощі, мед</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">115 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 25 -->
+      <div class="item-card fade-in" style="animation-delay: 2.4s;" data-price="100" data-ingredients="еспресо, малиновий сироп, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Малинове Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, малиновий сироп, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">100 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 26 -->
+      <div class="item-card fade-in" style="animation-delay: 2.5s;" data-price="120" data-ingredients="шеррі, еспресо, ягоди" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Коблер</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Шеррі, еспресо, ягоди</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">120 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 27 -->
+      <div class="item-card fade-in" style="animation-delay: 2.6s;" data-price="110" data-ingredients="еспресо, лікер тірамісу, вершки" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Тірамісу Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, лікер тірамісу, вершки</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">110 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 28 -->
+      <div class="item-card fade-in" style="animation-delay: 2.7s;" data-price="135" data-ingredients="коньяк, еспресо, лимонний сік" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Сайдкар</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Коньяк, еспресо, лимонний сік</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">135 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 29 -->
+      <div class="item-card fade-in" style="animation-delay: 2.8s;" data-price="130" data-ingredients="бурбон, еспресо, яйце, мускат" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Фліп</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Бурбон, еспресо, яйце, мускат</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">130 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 30 -->
+      <div class="item-card fade-in" style="animation-delay: 2.9s;" data-price="125" data-ingredients="еспресо, ром, молоко, яйце" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кавовий Егг-Ног</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, ром, молоко, яйце</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">125 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 31 -->
+      <div class="item-card fade-in" style="animation-delay: 3s;" data-price="115" data-ingredients="еспресо, імбирний сироп, содова" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Імбирний Кава Фіз</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, імбирний сироп, содова</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">115 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 32 -->
+      <div class="item-card fade-in" style="animation-delay: 3.1s;" data-price="105" data-ingredients="еспресо, грушевий сироп, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Грушевий Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, грушевий сироп, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">105 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 33 -->
+      <div class="item-card fade-in" style="animation-delay: 3.2s;" data-price="120" data-ingredients="еспресо, ром, кокосовий сироп" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кокосовий Кавовий Пунш</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, ром, кокосовий сироп</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">120 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 34 -->
+      <div class="item-card fade-in" style="animation-delay: 3.3s;" data-price="95" data-ingredients="еспресо, вишневий сироп, молоко" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Вишневий Латте</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Еспресо, вишневий сироп, молоко</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">95 грн</p>
+        </div>
+      </div>
+      <!-- Коктейль 35 -->
+      <div class="item-card fade-in" style="animation-delay: 3.4s;" data-price="140" data-ingredients="джин, еспресо, грейпфрутовий сік" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Грейпфрутовий Кавовий Коллінз</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Джин, еспресо, грейпфрутовий сік</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">140 грн</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Раздел Печенье -->
+    <h2 class="text-4xl md:text-5xl font-semibold text-center mt-16 mb-10 text-[#d4a373] drop-shadow-lg">Смачне Печенье</h2>
+    <div id="cookie-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Печенье 1 -->
+      <div class="item-card fade-in" data-price="25" data-ingredients="борошно, цукор, масло" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Шоколадне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Шоколадна глазур, ваніль</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">25 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 2 -->
+      <div class="item-card fade-in" style="animation-delay: 0.1s;" data-price="20" data-ingredients="борошно, мед, горіхи" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Медове Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Мед, горіхи, кориця</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">20 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 3 -->
+      <div class="item-card fade-in" style="animation-delay: 0.2s;" data-price="22" data-ingredients="борошно, какао, масло" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Какао Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Какао, цукор, ваніль</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">22 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 4 -->
+      <div class="item-card fade-in" style="animation-delay: 0.3s;" data-price="18" data-ingredients="борошно, цукор, яйце" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Ванільне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Ваніль, масло, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">18 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 5 -->
+      <div class="item-card fade-in" style="animation-delay: 0.4s;" data-price="23" data-ingredients="борошно, мигдаль, мед" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Мигдальне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Мигдаль, мед, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">23 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 6 -->
+      <div class="item-card fade-in" style="animation-delay: 0.5s;" data-price="20" data-ingredients="борошно, кориця, масло" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Коричне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Кориця, масло, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">20 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 7 -->
+      <div class="item-card fade-in" style="animation-delay: 0.6s;" data-price="25" data-ingredients="борошно, шоколад, яйце" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Шоколадний Чіпс</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Шоколадні чіпси, масло</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">25 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 8 -->
+      <div class="item-card fade-in" style="animation-delay: 0.7s;" data-price="19" data-ingredients="борошно, лимон, цукор" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Лимонне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Лимонна цедра, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">19 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 9 -->
+      <div class="item-card fade-in" style="animation-delay: 0.8s;" data-price="22" data-ingredients="борошно, горіхи, мед" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Горіхове Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Горіхи, мед, масло</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">22 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 10 -->
+      <div class="item-card fade-in" style="animation-delay: 0.9s;" data-price="21" data-ingredients="борошно, карамель, масло" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Карамельне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Карамель, масло, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">21 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 11 -->
+      <div class="item-card fade-in" style="animation-delay: 1s;" data-price="24" data-ingredients="борошно, кокос, цукор" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Кокосове Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Кокосова стружка, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">24 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 12 -->
+      <div class="item-card fade-in" style="animation-delay: 1.1s;" data-price="20" data-ingredients="борошно, імбир, мед" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Імбирне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Імбир, мед, спеції</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">20 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 13 -->
+      <div class="item-card fade-in" style="animation-delay: 1.2s;" data-price="23" data-ingredients="борошно, овес, мед" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Овсяне Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Овес, мед, горіхи</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">23 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 14 -->
+      <div class="item-card fade-in" style="animation-delay: 1.3s;" data-price="19" data-ingredients="борошно, апельсин, цукор" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Апельсинове Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Апельсинова цедра, цукор</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">19 грн</p>
+        </div>
+      </div>
+      <!-- Печенье 15 -->
+      <div class="item-card fade-in" style="animation-delay: 1.4s;" data-price="22" data-ingredients="борошно, шоколад, горіхи" onclick="window.location.href='index2.html'">
+        <div class="p-4">
+          <h3 class="text-2xl font-bold text-[#fffef2]">Шоколадно-Горіхове Печенье</h3>
+          <p class="text-sm text-[#d4a373] mt-1">Шоколад, горіхи, масло</p>
+          <p class="text-lg font-semibold mt-2 text-[#fffef2]">22 грн</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer>
+    <p class="text-[#fffef2] text-lg">© 2025 Кофейний Куточок. Усі права захищено.</p>
+  </footer>
+
+  <script>
+    // Функция фильтрации и сортировки с анимацией
+    function filterCocktails() {
+      const priceFilter = document.getElementById('price-filter').value;
+      const cocktailGrid = document.getElementById('cocktail-grid');
+      const cookieGrid = document.getElementById('cookie-grid');
+      let cocktails = Array.from(cocktailGrid.children);
+      let cookies = Array.from(cookieGrid.children);
+
+      // Сортировка коктейлей
+      if (priceFilter !== 'all') {
+        cocktails.sort((a, b) => {
+          const priceA = parseInt(a.getAttribute('data-price'));
+          const priceB = parseInt(b.getAttribute('data-price'));
+          return priceFilter === 'low-to-high' ? priceA - priceB : priceB - priceA;
+        });
+        cookies.sort((a, b) => {
+          const priceA = parseInt(a.getAttribute('data-price'));
+          const priceB = parseInt(b.getAttribute('data-price'));
+          return priceFilter === 'low-to-high' ? priceA - priceB : priceB - priceA;
+        });
+
+        // Применение анимации
+        cocktails.forEach(card => card.classList.add('sort-anim'));
+        cookies.forEach(card => card.classList.add('sort-anim'));
+
+        setTimeout(() => {
+          cocktailGrid.innerHTML = '';
+          cookieGrid.innerHTML = '';
+          cocktails.forEach((cocktail, index) => {
+            cocktail.style.animationDelay = `${index * 0.1}s`;
+            cocktailGrid.appendChild(cocktail);
+          });
+          cookies.forEach((cookie, index) => {
+            cookie.style.animationDelay = `${index * 0.1}s`;
+            cookieGrid.appendChild(cookie);
+          });
+          setTimeout(() => {
+            cocktails.forEach(card => card.classList.remove('sort-anim'));
+            cookies.forEach(card => card.classList.remove('sort-anim'));
+          }, 600);
+        }, 0);
+      }
+    }
+
+    // Анимация при скролле
+    const cards = document.querySelectorAll('.item-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    cards.forEach(card => observer.observe(card));
+  </script>
+</body>
+</html>
